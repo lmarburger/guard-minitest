@@ -31,6 +31,10 @@ module Guard
         @options[:seed]
       end
 
+      def load_path
+        Array @options[:load_path]
+      end
+
       def verbose?
         @options[:verbose]
       end
@@ -65,6 +69,11 @@ module Guard
           end
         else
           cmd_parts << 'ruby -Itest -Ispec'
+
+          unless load_path.empty?
+            cmd_parts.concat load_path.map { |path| "-I#{ path }" }
+          end
+
           cmd_parts << '-r rubygems' if rubygems?
           cmd_parts << '-r bundler/setup' if bundler?
           paths.each do |path|

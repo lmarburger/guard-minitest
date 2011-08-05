@@ -18,6 +18,22 @@ describe Guard::Minitest::Runner do
 
     end
 
+    describe 'load_path' do
+
+      it 'default should be an empty array' do
+        subject.new.load_path.must_equal []
+      end
+
+      it 'should be set with a single path' do
+        subject.new(:load_path => 'lib').load_path.must_equal %w( lib )
+      end
+
+      it 'should be set with multiple load paths' do
+        subject.new(:load_path => %w( lib vendor )).load_path.must_equal %w( lib vendor )
+      end
+
+    end
+
     describe 'verbose' do
 
       it 'default should should be false' do
@@ -108,6 +124,15 @@ describe Guard::Minitest::Runner do
       Guard::UI.expects(:info)
       runner.expects(:system).with(
         "ruby -Itest -Ispec -r ./test/test_minitest.rb -r #{@default_runner} -e 'GUARD_NOTIFY=true; MiniTest::Unit.autorun' -- --seed 12345"
+      )
+      runner.run(['test/test_minitest.rb'])
+    end
+
+    it 'should add paths to the load path' do
+      runner = subject.new(:load_path => %w( lib vendor ))
+      Guard::UI.expects(:info)
+      runner.expects(:system).with(
+        "ruby -Itest -Ispec -Ilib -Ivendor -r ./test/test_minitest.rb -r #{@default_runner} -e 'GUARD_NOTIFY=true; MiniTest::Unit.autorun' --"
       )
       runner.run(['test/test_minitest.rb'])
     end
